@@ -14,5 +14,12 @@ module GPUE
 
   include("ds/aux.jl")
   export Aux
+
+
+  # Load simulation functions
+
+  include("sim/split_op.jl")
+  export split_op!
+
 end
 
