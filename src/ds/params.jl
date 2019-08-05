@@ -21,7 +21,15 @@ struct Params
   y::CuArray{Complex{Float64}}
   z::CuArray{Complex{Float64}}
 
+  nAtoms::Integer
   mass::Float64
+  scatterLen::Float64
+
+  a0x::Float64
+  a0y::Float64
+  a0z::Float64
+
+  Rxy::Float64
 
   k::CuArray{Complex{Float64}}
 
@@ -30,13 +38,31 @@ struct Params
   gstate::Bool
 
   # kwargs?
-  function Params(xDim=128, yDim=128, zDim=1, xMax=1.67731e-05, yMax=1.67731e-05, zMax=1.67731e-05, omegaX=1.0, omegaY=1.0, omegaZ=1.0, mass=1.4431607e-25, dt=1e-4)
+  function Params(xDim=128, yDim=128, zDim=1, boxSize=0.0, omegaX=1.0, omegaY=1.0, omegaZ=1.0, dt=1e-4)
     if yDim == zDim == 1
       dimnum = 1
     elseif zDim == 1
       dimnum = 2
     else
       dimnum = 3
+    end
+
+    nAtoms = 1
+    mass = 1.4431607e-25
+    scatterLen = 4.76e-9
+
+    a0x = sqrt(ħ / (2 * mass * omegaX))
+    a0y = sqrt(ħ / (2 * mass * omegaY))
+    a0z = sqrt(ħ / (2 * mass * omegaZ))
+
+    Rxy = (15.0 * nAtoms * scatterLen * sqrt(mass * omegaZ / ħ)) ^ 0.2
+
+    if boxSize > 0
+      xMax = yMax = zMax = boxSize
+    else
+      xMax = 6 * Rxy * omegaX
+      yMax = 6 * Rxy * omegaY
+      zMax = 6 * Rxy * omegaZ
     end
 
     dx = 2 * xMax / xDim
@@ -59,8 +85,6 @@ struct Params
     py = (dimnum > 1 ? 1 : 0) * vcat(0 : dpy : pyMax - dpy, -pyMax : dpy : -dpy / 2)
     pz = (dimnum > 2 ? 1 : 0) * vcat(0 : dpz : pzMax - dpz, -pzMax : dpz : -dpz / 2)
     
-    println("dpx: $dpx, dpy: $dpy, dpz: $dpz, pxMax: $pxMax, pyMax: $pyMax, pzMax: $pzMax")
- 
     k = @. (ħ * ħ / (2.0 * mass)) * (px^2 + py^2 + pz^2)
  
     gstate = real(dt) == dt
@@ -70,7 +94,8 @@ struct Params
               xMax, yMax, zMax,
               omegaX, omegaY, omegaZ,
               CuArray(complex(x)), CuArray(complex(y)), CuArray(complex(z)),
-              mass,
+              nAtoms, mass, scatterLen,
+              a0x, a0y, a0z, Rxy
               CuArray(complex(k)),
               dt,
               gstate)
