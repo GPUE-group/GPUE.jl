@@ -1,4 +1,8 @@
+# Julia files
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
 deps/deps.jl
+
+# Vim swap files
+*.swp
