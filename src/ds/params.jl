@@ -31,6 +31,8 @@ struct Params
 
   Rxy::Float64
 
+  winding::Float64
+
   k::CuArray{Complex{Float64}}
 
   dt::Complex{Float64}
@@ -38,7 +40,7 @@ struct Params
   gstate::Bool
 
   # kwargs?
-  function Params(xDim=128, yDim=128, zDim=1, boxSize=0.0, omegaX=1.0, omegaY=1.0, omegaZ=1.0, dt=1e-4)
+  function Params(xDim=128, yDim=128, zDim=1, boxSize=0.0, omegaX=1.0, omegaY=1.0, omegaZ=1.0, winding=0.0, dt=1e-4)
     if yDim == zDim == 1
       dimnum = 1
     elseif zDim == 1
@@ -95,7 +97,7 @@ struct Params
               omegaX, omegaY, omegaZ,
               CuArray(complex(x)), CuArray(complex(y)), CuArray(complex(z)),
               nAtoms, mass, scatterLen,
-              a0x, a0y, a0z, Rxy
+              a0x, a0y, a0z, Rxy, winding,
               CuArray(complex(k)),
               dt,
               gstate)
