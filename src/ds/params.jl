@@ -17,9 +17,9 @@ struct Params
   omegaY::Float64
   omegaZ::Float64
 
-  x::CuArray{Complex{Float64}}
-  y::CuArray{Complex{Float64}}
-  z::CuArray{Complex{Float64}}
+  x::CuArray{Float64}
+  y::CuArray{Float64}
+  z::CuArray{Float64}
 
   nAtoms::Integer
   mass::Float64
@@ -39,8 +39,9 @@ struct Params
 
   gstate::Bool
 
-  # kwargs?
-  function Params(xDim=128, yDim=128, zDim=1, boxSize=0.0, omegaX=1.0, omegaY=1.0, omegaZ=1.0, winding=0.0, dt=1e-4)
+  iterations::Integer
+
+  function Params(xDim=256, yDim=256, zDim=1, boxSize=0.0, omegaX=2*pi, omegaY=2*pi, omegaZ=2*pi, winding=0.0, dt=1e-4, iterations=100)
     if yDim == zDim == 1
       dimnum = 1
     elseif zDim == 1
@@ -71,9 +72,9 @@ struct Params
     dy = 2 * yMax / yDim
     dz = 2 * zMax / zDim
 
-    x = (dimnum > 0 ? 1 : 0) * collect(-xMax + dx : dx : xMax)
-    y = (dimnum > 1 ? 1 : 0) * collect(-yMax + dy : dy : yMax)
-    z = (dimnum > 2 ? 1 : 0) * collect(-zMax + dz : dz : zMax)
+    x = dimnum < 1 ? [0] : collect(-xMax + dx/2 : dx : xMax)
+    y = dimnum < 2 ? [0] : collect(-yMax + dy/2 : dy : yMax)
+    z = dimnum < 3 ? [0] : collect(-zMax + dz/2 : dz : zMax)
 
     dpx = pi / xMax
     dpy = pi / yMax
@@ -83,11 +84,11 @@ struct Params
     pyMax = dpy * (yDim / 2)
     pzMax = dpz * (zDim / 2)
 
-    px = (dimnum > 0 ? 1 : 0) * vcat(0 : dpx : pxMax - dpx, -pxMax : dpx : -dpx / 2)
-    py = (dimnum > 1 ? 1 : 0) * vcat(0 : dpy : pyMax - dpy, -pyMax : dpy : -dpy / 2)
-    pz = (dimnum > 2 ? 1 : 0) * vcat(0 : dpz : pzMax - dpz, -pzMax : dpz : -dpz / 2)
+    px = dimnum < 1 ? [0] : vcat(0 : dpx : pxMax - dpx, -pxMax : dpx : -dpx / 2)
+    py = dimnum < 2 ? [0] : vcat(0 : dpy : pyMax - dpy, -pyMax : dpy : -dpy / 2)
+    pz = dimnum < 3 ? [0] : vcat(0 : dpz : pzMax - dpz, -pzMax : dpz : -dpz / 2)
     
-    k = @. (ħ * ħ / (2.0 * mass)) * (px^2 + py^2 + pz^2)
+    k = @. (ħ * ħ / (2.0 * mass)) * (px * px + py * py + pz * pz)
  
     gstate = real(dt) == dt
 
@@ -95,11 +96,12 @@ struct Params
               dx, dy, dz,
               xMax, yMax, zMax,
               omegaX, omegaY, omegaZ,
-              CuArray(complex(x)), CuArray(complex(y)), CuArray(complex(z)),
+              CuArray(x), CuArray(y), CuArray(z),
               nAtoms, mass, scatterLen,
               a0x, a0y, a0z, Rxy, winding,
               CuArray(complex(k)),
               dt,
-              gstate)
+              gstate,
+              iterations)
   end
 end

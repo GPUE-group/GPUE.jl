@@ -6,3 +6,6 @@ deps/deps.jl
 
 # Vim swap files
 *.swp
+
+# Output
+output.h5

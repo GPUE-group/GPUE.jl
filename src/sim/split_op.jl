@@ -12,5 +12,5 @@ function split_op!(par::Params, opr::Operators, aux::Aux)
   aux.inverse_plan * opr.wfc
 
   # Final half-step in real space
-  opr.wfc .*= opr.R
+  opr.wfc .*= opr.V
 end
