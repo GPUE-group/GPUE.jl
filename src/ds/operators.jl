@@ -23,6 +23,6 @@ function Operators(par::Params)
                 +(par.z / par.Rxy / par.a0z) * (par.z / par.Rxy / par.a0z))
                 + ϕ * im)
 
-  return new(V, K, wfc)
+  return Operators(V, K, wfc)
 end
 

@@ -5,6 +5,7 @@ struct Params
   yDim::Integer
   zDim::Integer
 
+  chunks::Tuple{Vararg{Integer}}
   dx::Float64
   dy::Float64
   dz::Float64
@@ -35,20 +36,25 @@ struct Params
 
   k::CuArray{Complex{Float64}}
 
+  compression::Integer
+
   dt::Complex{Float64}
 
   gstate::Bool
 
   iterations::Integer
-
+  printSteps::Integer
 end
 
-function Params(xDim=256, yDim=256, zDim=1, boxSize=0.0, omegaX=2*pi, omegaY=2*pi, omegaZ=2*pi, winding=0.0, dt=1e-4, iterations=100)
+function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omegaX=2*pi, omegaY=2*pi, omegaZ=2*pi, winding=0.0, compression=6, dt=1e-4, iterations=1, printSteps=100)
   if yDim == zDim == 1
+    chunks = (Int(sqrt(xDim)))
     dimnum = 1
   elseif zDim == 1
+    chunks = (Int(sqrt(xDim)), Int(sqrt(yDim)))
     dimnum = 2
   else
+    chunks = (Int(sqrt(xDim)), Int(sqrt(yDim)), Int(sqrt(zDim)))
     dimnum = 3
   end
 
@@ -65,18 +71,18 @@ function Params(xDim=256, yDim=256, zDim=1, boxSize=0.0, omegaX=2*pi, omegaY=2*p
   if boxSize > 0
     xMax = yMax = zMax = boxSize
   else
-    xMax = 6 * Rxy * omegaX
-    yMax = 6 * Rxy * omegaY
-    zMax = 6 * Rxy * omegaZ
+    xMax = 6 * Rxy * a0x
+    yMax = 6 * Rxy * a0y
+    zMax = 6 * Rxy * a0z
   end
 
   dx = 2 * xMax / xDim
   dy = 2 * yMax / yDim
   dz = 2 * zMax / zDim
 
-  x = dimnum < 1 ? [0] : collect(-xMax + dx/2 : dx : xMax)
-  y = dimnum < 2 ? [0] : collect(-yMax + dy/2 : dy : yMax)
-  z = dimnum < 3 ? [0] : collect(-zMax + dz/2 : dz : zMax)
+  x = dimnum < 1 ? [0] : reshape(collect(-xMax + dx/2 : dx : xMax), (xDim,))
+  y = dimnum < 2 ? [0] : reshape(collect(-yMax + dy/2 : dy : yMax), (1, yDim))
+  z = dimnum < 3 ? [0] : reshape(collect(-zMax + dz/2 : dz : zMax), (1, 1, zDim))
 
   dpx = pi / xMax
   dpy = pi / yMax
@@ -86,15 +92,16 @@ function Params(xDim=256, yDim=256, zDim=1, boxSize=0.0, omegaX=2*pi, omegaY=2*p
   pyMax = dpy * (yDim / 2)
   pzMax = dpz * (zDim / 2)
 
-  px = dimnum < 1 ? [0] : vcat(0 : dpx : pxMax - dpx, -pxMax : dpx : -dpx / 2)
-  py = dimnum < 2 ? [0] : vcat(0 : dpy : pyMax - dpy, -pyMax : dpy : -dpy / 2)
-  pz = dimnum < 3 ? [0] : vcat(0 : dpz : pzMax - dpz, -pzMax : dpz : -dpz / 2)
+  px = dimnum < 1 ? [0] : reshape(vcat(0 : dpx : pxMax - dpx, -pxMax : dpx : -dpx / 2), (xDim,))
+  py = dimnum < 2 ? [0] : reshape(vcat(0 : dpy : pyMax - dpy, -pyMax : dpy : -dpy / 2), (1, yDim))
+  pz = dimnum < 3 ? [0] : reshape(vcat(0 : dpz : pzMax - dpz, -pzMax : dpz : -dpz / 2), (1, 1, zDim))
   
   k = @. (ħ * ħ / (2.0 * mass)) * (px * px + py * py + pz * pz)
 
   gstate = real(dt) == dt
 
-  return new(dimnum, xDim, yDim, zDim,
+  return Params(dimnum,
+            xDim, yDim, zDim, chunks,
             dx, dy, dz,
             xMax, yMax, zMax,
             omegaX, omegaY, omegaZ,
@@ -102,8 +109,9 @@ function Params(xDim=256, yDim=256, zDim=1, boxSize=0.0, omegaX=2*pi, omegaY=2*p
             nAtoms, mass, scatterLen,
             a0x, a0y, a0z, Rxy, winding,
             CuArray(complex(k)),
+            compression,
             dt,
             gstate,
-            iterations)
+            iterations, printSteps)
 end
 

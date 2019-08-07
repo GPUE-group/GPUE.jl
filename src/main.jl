@@ -1,7 +1,7 @@
 using GPUE
 
 f = initFileData()
-par = Params()
+par = Params(iterations=10000)
 opr = Operators(par)
 aux = Aux(opr)
 

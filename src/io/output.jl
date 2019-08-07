@@ -8,9 +8,6 @@ struct FileData
   k::HDF5Group
 
   domain::HDF5Group
-  x::HDF5Group
-  y::HDF5Group
-  z::HDF5Group
   
   datasets::Dict{String, HDF5Dataset}
 end
@@ -26,7 +23,40 @@ function writeAttributes(f::FileData, par::Params)
   end
 end
 
+function writeWfc(f::FileData, par::Params, opr::Operators, aux::Aux)
+  if (par.gstate)
+    group = f.wfc_const
+  else
+    group = f.wfc_ev
+  end
+  
+  group[string(aux.i), "chunk", par.chunks, "compress", par.compression] = Array(opr.wfc)
+end
+
+function writeV(f::FileData, par::Params, opr::Operators, aux::Aux)
+  group = f.v
+  
+  group[string(aux.i), "chunk", par.chunks, "compress", par.compression] = Array(opr.V)
+end
+
+function writeK(f::FileData, par::Params, opr::Operators, aux::Aux)
+  group = f.k
+
+  group[string(aux.i), "chunk", par.chunks, "compress", par.compression] = Array(opr.K)
+end
+
+function writeAxes(f::FileData, par::Params)
+  group = f.domain
+
+  group["X"] = Array(par.x)
+  group["Y"] = Array(par.y)
+  group["Z"] = Array(par.z)
+end
+
 function initFileData()
+  # WARNING: This has yet to be merged into HDF5.jl
+  HDF5.set_complex_field_names("re", "im")
+
   file = h5open("./output.h5", "w")
 
   wfc = g_create(file, "WFC")
@@ -37,11 +67,8 @@ function initFileData()
   k = g_create(file, "K")
 
   domain = g_create(file, "DOMAIN")
-  x = g_create(domain, "X")
-  y = g_create(domain, "Y")
-  z = g_create(domain, "Z")
 
-  return FileData(file, wfc, wfc_const, wfc_ev, v, k, domain, x, y, z, Dict())
+  return FileData(file, wfc, wfc_const, wfc_ev, v, k, domain, Dict())
 end
 
 
