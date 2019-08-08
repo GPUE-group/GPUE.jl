@@ -14,6 +14,7 @@ struct Params
   yMax::Float64
   zMax::Float64
 
+  omega::Float64
   omegaX::Float64
   omegaY::Float64
   omegaZ::Float64
@@ -34,6 +35,9 @@ struct Params
 
   winding::Float64
 
+  px::CuArray{Complex{Float64}}
+  py::CuArray{Complex{Float64}}
+  pz::CuArray{Complex{Float64}}
   k::CuArray{Complex{Float64}}
 
   compression::Integer
@@ -46,7 +50,7 @@ struct Params
   printSteps::Integer
 end
 
-function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omegaX=2*pi, omegaY=2*pi, omegaZ=2*pi, winding=0.0, compression=6, dt=1e-4, iterations=1, printSteps=100)
+function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*pi, omegaY=2*pi, omegaZ=2*pi, winding=0.0, compression=6, dt=1e-4, iterations=1, printSteps=100)
   if yDim == zDim == 1
     chunks = (Int(sqrt(xDim)))
     dimnum = 1
@@ -104,10 +108,11 @@ function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omegaX=2*pi, omegaY=2
             xDim, yDim, zDim, chunks,
             dx, dy, dz,
             xMax, yMax, zMax,
-            omegaX, omegaY, omegaZ,
+            omega, omegaX, omegaY, omegaZ,
             CuArray(x), CuArray(y), CuArray(z),
             nAtoms, mass, scatterLen,
             a0x, a0y, a0z, Rxy, winding,
+            CuArray(complex(px)), CuArray(complex(py)), CuArray(complex(pz)),
             CuArray(complex(k)),
             compression,
             dt,

@@ -32,6 +32,8 @@ module GPUE
 
   include("sim/split_op.jl")
 
+  include("sim/gauge.jl")
+
   include("sim/evolution.jl")
   export evolve
 

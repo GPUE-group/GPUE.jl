@@ -4,6 +4,9 @@ mutable struct Operators
   K::CuArray{Complex{Float64}}
   wfc::CuArray{Complex{Float64}}
 
+  Ax::CuArray{Complex{Float64}}
+  Ay::CuArray{Complex{Float64}}
+  Az::CuArray{Complex{Float64}}
 end
 
 function Operators(par::Params)
@@ -23,6 +26,18 @@ function Operators(par::Params)
                 +(par.z / par.Rxy / par.a0z) * (par.z / par.Rxy / par.a0z))
                 + ϕ * im)
 
-  return Operators(V, K, wfc)
+  Ax = CuArray{Complex{Float64}}(undef, size(wfc))
+  Ay = CuArray{Complex{Float64}}(undef, size(wfc))
+  Az = CuArray{Complex{Float64}}(undef, size(wfc))
+
+  @. Ax = par.y * par.omega * par.omegaX
+  @. Ay = -par.x * par.omega * par.omegaZ
+  @. Az = 0
+
+  Ax = @. exp(Ax * par.dt)
+  Ay = @. exp(Ay * par.dt)
+  Az = @. exp(Az * par.dt)
+
+  return Operators(V, K, wfc, Ax, Ay, Az)
 end
 
