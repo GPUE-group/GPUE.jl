@@ -1,11 +1,12 @@
 using GPUE
 
-f = initFileData()
-par = Params(iterations=10000)
-opr = Operators(par)
-aux = Aux(opr)
 
 try
+  global f = initFileData()
+  global par = Params(iterations=1)
+  global opr = Operators(par)
+  global aux = Aux(par, opr)
+
   evolve(f, par, opr, aux)
 finally
   terminate(f, par, opr, aux)

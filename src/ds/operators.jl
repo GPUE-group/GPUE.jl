@@ -34,9 +34,9 @@ function Operators(par::Params)
   @. Ay = -par.x * par.omega * par.omegaZ
   @. Az = 0
 
-  Ax = @. exp(Ax * par.dt)
-  Ay = @. exp(Ay * par.dt)
-  Az = @. exp(Az * par.dt)
+  Ax = @. exp(Ax * par.px * par.dt)
+  Ay = @. exp(Ay * par.py * par.dt)
+  Az = @. exp(Az * par.pz * par.dt)
 
   return Operators(V, K, wfc, Ax, Ay, Az)
 end
