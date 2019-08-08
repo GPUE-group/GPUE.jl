@@ -12,6 +12,7 @@ function evolve(f::FileData, par::Params, opr::Operators, aux::Aux)
       if aux.i == 0
         writeV(f, par, opr, aux)
         writeK(f, par, opr, aux)
+        writeGauge(f, par, opr, aux)
         writeAxes(f, par)
       end
     end

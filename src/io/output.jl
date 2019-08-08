@@ -4,12 +4,16 @@ struct FileData
   wfc::HDF5Group
   wfc_const::HDF5Group
   wfc_ev::HDF5Group
+
   v::HDF5Group
   k::HDF5Group
 
+  a::HDF5Group
+  ax::HDF5Group
+  ay::HDF5Group
+  az::HDF5Group
+
   domain::HDF5Group
-  
-  datasets::Dict{String, HDF5Dataset}
 end
 
 ## Creating new output
@@ -23,6 +27,10 @@ function writeAttributes(f::FileData, par::Params)
   end
 end
 
+function getChunks(x)
+  map(elem -> Int(floor(sqrt(elem))), size(x))
+end
+
 function writeWfc(f::FileData, par::Params, opr::Operators, aux::Aux)
   if (par.gstate)
     group = f.wfc_const
@@ -30,19 +38,25 @@ function writeWfc(f::FileData, par::Params, opr::Operators, aux::Aux)
     group = f.wfc_ev
   end
   
-  group[string(aux.i), "chunk", par.chunks, "compress", par.compression] = Array(opr.wfc)
+  group[string(aux.i), "chunk", getChunks(opr.wfc), "compress", par.compression] = Array(opr.wfc)
 end
 
 function writeV(f::FileData, par::Params, opr::Operators, aux::Aux)
   group = f.v
   
-  group[string(aux.i), "chunk", par.chunks, "compress", par.compression] = Array(opr.V)
+  group[string(aux.i), "chunk", getChunks(opr.V), "compress", par.compression] = Array(opr.V)
 end
 
 function writeK(f::FileData, par::Params, opr::Operators, aux::Aux)
   group = f.k
 
-  group[string(aux.i), "chunk", par.chunks, "compress", par.compression] = Array(opr.K)
+  group[string(aux.i), "chunk", getChunks(opr.K), "compress", par.compression] = Array(opr.K)
+end
+
+function writeGauge(f::FileData, par::Params, opr::Operators, aux::Aux)
+  f.ax[string(aux.i), "chunk", getChunks(opr.Ax), "compress", par.compression] = Array(opr.Ax)
+  f.ay[string(aux.i), "chunk", getChunks(opr.Ay), "compress", par.compression] = Array(opr.Ay)
+  f.az[string(aux.i), "chunk", getChunks(opr.Az), "compress", par.compression] = Array(opr.Az)
 end
 
 function writeAxes(f::FileData, par::Params)
@@ -66,33 +80,43 @@ function initFileData()
   v = g_create(file, "V")
   k = g_create(file, "K")
 
+  a = g_create(file, "A")
+  ax = g_create(a, "AX")
+  ay = g_create(a, "AY")
+  az = g_create(a, "AZ")
+
   domain = g_create(file, "DOMAIN")
 
-  return FileData(file, wfc, wfc_const, wfc_ev, v, k, domain, Dict())
+  return FileData(file, wfc, wfc_const, wfc_ev, v, k, a, ax, ay, az, domain)
 end
-
 
 ## Loading previous output
 
-function loadGroup(f::FileData)
-
-end
-
-function loadAttribute(f::FileData)
-
-end
-
-function loadDataSet(f::FileData)
-
-end
-
 function loadFileData()
+  file = h5open("./output.h5", "r+")
 
+  wfc = file["WFC"]
+  wfc_const = wfc["CONST"]
+  wfc_ev = wfc["EV"]
+
+  v = file["V"]
+  k = file["K"]
+
+  a = file["A"]
+  ax = a["AX"]
+  ay = a["AY"]
+  az = a["AZ"]
+
+  domain = file["DOMAIN"]
+
+  return FileData(file, wfc, wfc_const, wfc_ev, v, k, a, ax, ay, az, domain)
 end
 
 
 ## Conclude operations
 
 function closeFile(f::FileData)
-  close(f.file)
+  if isopen(f.file)
+    close(f.file)
+  end
 end

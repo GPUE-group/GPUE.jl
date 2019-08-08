@@ -5,7 +5,6 @@ struct Params
   yDim::Integer
   zDim::Integer
 
-  chunks::Tuple{Vararg{Integer}}
   dx::Float64
   dy::Float64
   dz::Float64
@@ -50,15 +49,12 @@ struct Params
   printSteps::Integer
 end
 
-function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*pi, omegaY=2*pi, omegaZ=2*pi, winding=0.0, compression=6, dt=1e-4, iterations=1, printSteps=100)
+function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*pi, omegaY=2*pi, omegaZ=2*pi, winding=0.0, compression=6, dt=1e-4im, iterations=1, printSteps=100)
   if yDim == zDim == 1
-    chunks = (Int(sqrt(xDim)))
     dimnum = 1
   elseif zDim == 1
-    chunks = (Int(sqrt(xDim)), Int(sqrt(yDim)))
     dimnum = 2
   else
-    chunks = (Int(sqrt(xDim)), Int(sqrt(yDim)), Int(sqrt(zDim)))
     dimnum = 3
   end
 
@@ -102,10 +98,10 @@ function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*p
   
   k = @. (ħ * ħ / (2.0 * mass)) * (px * px + py * py + pz * pz)
 
-  gstate = real(dt) == dt
+  gstate = real(dt) != dt
 
   return Params(dimnum,
-            xDim, yDim, zDim, chunks,
+            xDim, yDim, zDim,
             dx, dy, dz,
             xMax, yMax, zMax,
             omega, omegaX, omegaY, omegaZ,
