@@ -31,6 +31,10 @@ function getChunks(x)
   map(elem -> Int(floor(sqrt(elem))), size(x))
 end
 
+function zpad(i)
+  lpad(i, 6, "0")
+end
+
 function writeWfc(f::FileData, par::Params, opr::Operators, aux::Aux)
   if (par.gstate)
     group = f.wfc_const
@@ -38,25 +42,25 @@ function writeWfc(f::FileData, par::Params, opr::Operators, aux::Aux)
     group = f.wfc_ev
   end
   
-  group[string(aux.i), "chunk", getChunks(opr.wfc), "compress", par.compression] = Array(opr.wfc)
+  group[zpad(aux.i), "chunk", getChunks(opr.wfc), "compress", par.compression] = Array(opr.wfc)
 end
 
 function writeV(f::FileData, par::Params, opr::Operators, aux::Aux)
   group = f.v
   
-  group[string(aux.i), "chunk", getChunks(opr.V), "compress", par.compression] = Array(opr.V)
+  group[zpad(aux.i), "chunk", getChunks(opr.V), "compress", par.compression] = Array(opr.V)
 end
 
 function writeK(f::FileData, par::Params, opr::Operators, aux::Aux)
   group = f.k
 
-  group[string(aux.i), "chunk", getChunks(opr.K), "compress", par.compression] = Array(opr.K)
+  group[zpad(aux.i), "chunk", getChunks(opr.K), "compress", par.compression] = Array(opr.K)
 end
 
 function writeGauge(f::FileData, par::Params, opr::Operators, aux::Aux)
-  f.ax[string(aux.i), "chunk", getChunks(opr.Ax), "compress", par.compression] = Array(opr.Ax)
-  f.ay[string(aux.i), "chunk", getChunks(opr.Ay), "compress", par.compression] = Array(opr.Ay)
-  f.az[string(aux.i), "chunk", getChunks(opr.Az), "compress", par.compression] = Array(opr.Az)
+  f.ax[zpad(aux.i), "chunk", getChunks(opr.Ax), "compress", par.compression] = Array(opr.Ax)
+  f.ay[zpad(aux.i), "chunk", getChunks(opr.Ay), "compress", par.compression] = Array(opr.Ay)
+  f.az[zpad(aux.i), "chunk", getChunks(opr.Az), "compress", par.compression] = Array(opr.Az)
 end
 
 function writeAxes(f::FileData, par::Params)
