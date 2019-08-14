@@ -10,14 +10,20 @@ mutable struct Operators
 end
 
 function Operators(par::Params)
+
   Vx = @. par.omegaX * par.x
   Vy = @. par.omegaY * par.y
   Vz = @. par.omegaZ * par.z
 
   V = @. 0.5 * par.mass * (Vx * Vx + Vy * Vy + Vz * Vz)
-  V = @. exp(-0.5im * par.dt / ħ * V)
-
-  K = @. exp(-1.0im * par.dt / ħ * par.k)
+  
+  if par.gstate
+    V = @. exp(0.5im * par.dt / ħ * V)
+    K = @. exp(1.0im * par.dt / ħ * par.k)
+  else
+    V = @. exp(-0.5im * par.dt / ħ * V)
+    K = @. exp(-1.0im * par.dt / ħ * par.k)
+  end
 
   ϕ = @. (par.winding * atan(par.y, par.x)) % (2π)
 
@@ -34,9 +40,15 @@ function Operators(par::Params)
   @. Ay = -par.x * par.omega * par.omegaZ
   @. Az = 0
 
-  Ax = @. exp(-1.0im * Ax * par.px * par.dt)
-  Ay = @. exp(-1.0im * Ay * par.py * par.dt)
-  Az = @. exp(-1.0im * Az * par.pz * par.dt)
+  if par.gstate
+    Ax = @. exp(1.0im * Ax * par.px * par.dt)
+    Ay = @. exp(1.0im * Ay * par.py * par.dt)
+    Az = @. exp(1.0im * Az * par.pz * par.dt)
+  else
+    Ax = @. exp(-1.0im * Ax * par.px * par.dt)
+    Ay = @. exp(-1.0im * Ay * par.py * par.dt)
+    Az = @. exp(-1.0im * Az * par.pz * par.dt)
+  end
 
   return Operators(V, K, wfc, Ax, Ay, Az)
 end
