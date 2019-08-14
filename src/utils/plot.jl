@@ -1,14 +1,20 @@
 using GPUE
 using Plots
+using HDF5
+
 GPUE.HDF5.set_complex_field_names("re", "im")
 
 f = loadFileData()
+gstate = read(attrs(f.file)["gstate"])
 
-anim = @animate for name in names(f.wfc_const)
-  dset = f.wfc_const[name]
-  wfc = read(dset)
-  heatmap(abs.(wfc))
+group = gstate ? f.wfc_const : f.wfc_ev
+
+anim = @animate for name in names(group)
+  dset = group[name]
+  data = read(dset)
+  heatmap(abs.(data), clims=(0, 2e5))
 end
 
-gif(anim, "./wfc.gif", fps=5)
+gif(anim, "./output/wfc.gif", fps=5)
 
+GPUE.closeFile(f)
