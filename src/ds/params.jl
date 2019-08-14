@@ -75,9 +75,9 @@ function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*p
     zMax = 6 * Rxy * a0z
   end
 
-  dx = 2 * xMax / xDim
-  dy = 2 * yMax / yDim
-  dz = 2 * zMax / zDim
+  dx = dimnum < 1 ? 1 : 2 * xMax / xDim
+  dy = dimnum < 2 ? 1 : 2 * yMax / yDim
+  dz = dimnum < 3 ? 1 : 2 * zMax / zDim
 
   x = dimnum < 1 ? [0] : reshape(collect(-xMax + dx/2 : dx : xMax), (xDim,))
   y = dimnum < 2 ? [0] : reshape(collect(-yMax + dy/2 : dy : yMax), (1, yDim))
