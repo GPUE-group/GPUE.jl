@@ -7,6 +7,8 @@ module GPUE
   
   # Temporary hack until CUDAnative issue #430 gets fixed
   @inline CUDAnative.exp(x::Complex{Float64}) = CUDAnative.exp(x.re) * (CUDAnative.cos(x.im) + 1.0im * CUDAnative.sin(x.im))
+  @inline CUDAnative.abs(x::Complex{Float64}) = CUDAnative.hypot(x.re, x.im)
+  @inline CUDAnative.abs2(x::Complex{Float64}) = x.re * x.re + x.im * x.im
 
   # Temporary hack until CUDAnative PR #443 gets merged
   @inline CUDAnative.atan(y, x) = CUDAnative.atan2(y, x)
