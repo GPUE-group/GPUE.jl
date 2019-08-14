@@ -8,4 +8,6 @@ deps/deps.jl
 *.swp
 
 # Output
+output/
 output.h5
+wfc.gif
