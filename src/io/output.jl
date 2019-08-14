@@ -71,7 +71,7 @@ function initFileData()
   # WARNING: This has yet to be merged into HDF5.jl
   HDF5.set_complex_field_names("re", "im")
 
-  file = h5open("./output.h5", "w")
+  file = h5open("./output/output.h5", "w")
 
   wfc = g_create(file, "WFC")
   wfc_const = g_create(wfc, "CONST")
@@ -93,7 +93,7 @@ end
 ## Loading previous output
 
 function loadFileData()
-  file = h5open("./output.h5", "r+")
+  file = h5open("./output/output.h5", "r+")
 
   wfc = file["WFC"]
   wfc_const = wfc["CONST"]
