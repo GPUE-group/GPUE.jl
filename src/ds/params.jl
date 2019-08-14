@@ -49,7 +49,7 @@ struct Params
   printSteps::Integer
 end
 
-function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*pi, omegaY=2*pi, omegaZ=2*pi, winding=0.0, compression=6, dt=1e-4im, iterations=1, printSteps=100)
+function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*pi, omegaY=2*pi, omegaZ=2*pi, winding=0.0, compression=6, dt=1e-4, nAtoms=1, iterations=1, printSteps=100)
   if yDim == zDim == 1
     dimnum = 1
   elseif zDim == 1
@@ -58,7 +58,6 @@ function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*p
     dimnum = 3
   end
 
-  nAtoms = 1
   mass = 1.4431607e-25
   scatterLen = 4.76e-9
 
