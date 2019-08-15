@@ -3,10 +3,11 @@ function update_density!(par::Params, opr::Operators, aux::Aux)
 end
 
 function normalize!(par::Params, opr::Operators, aux::Aux)
-  opr.wfc ./= sqrt(aux.density .* (par.dx * par.dy * par.dz))
+  opr.wfc ./= sqrt(aux.density * par.dx * par.dy * par.dz)
 end
 
 function split_op!(par::Params, opr::Operators, aux::Aux)
+  update_density!(par, opr, aux)
   density_opr = exp(im * par.g * aux.density * par.dt / ħ)
 
   # Half-step in real space
@@ -26,6 +27,7 @@ function split_op!(par::Params, opr::Operators, aux::Aux)
 
   # Renormalize if we are in imaginary time
   if par.gstate
-    normalize!(par, opr)
+    update_density!(par, opr, aux)
+    normalize!(par, opr, aux)
   end
 end

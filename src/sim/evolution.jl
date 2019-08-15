@@ -1,12 +1,13 @@
 function evolve(f::FileData, par::Params, opr::Operators, aux::Aux)
   update_density!(par, opr, aux)
-  normalize!(par, opr)
+  normalize!(par, opr, aux)
 
   writeAttributes(f, par)
 
   iterations = par.iterations
   while aux.i < iterations
     if aux.i % par.printSteps == 0
+      println("Density at t=$(aux.i): $(aux.density)")
       writeWfc(f, par, opr, aux)
       if aux.i == 0
         writeV(f, par, opr, aux)
@@ -23,3 +24,4 @@ function evolve(f::FileData, par::Params, opr::Operators, aux::Aux)
     aux.i += 1
   end
 end
+
