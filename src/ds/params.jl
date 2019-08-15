@@ -69,6 +69,9 @@ function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*p
   Rxy = (15.0 * nAtoms * scatterLen * sqrt(mass * omegaZ / ħ)) ^ 0.2
 
   g = 4.0 * nAtoms * ħ * ħ * pi * scatterLen / mass
+  if dimnum == 2
+    g *= sqrt(mass * omegaZ / (2 * pi * ħ))
+  end
 
   if boxSize > 0
     xMax = yMax = zMax = boxSize
