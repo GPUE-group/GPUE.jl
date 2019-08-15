@@ -25,6 +25,7 @@ struct Params
   nAtoms::Integer
   mass::Float64
   scatterLen::Float64
+  g::Float64
 
   a0x::Float64
   a0y::Float64
@@ -67,6 +68,8 @@ function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*p
 
   Rxy = (15.0 * nAtoms * scatterLen * sqrt(mass * omegaZ / ħ)) ^ 0.2
 
+  g = 4.0 * nAtoms * ħ * ħ * pi * scatterLen / mass
+
   if boxSize > 0
     xMax = yMax = zMax = boxSize
   else
@@ -105,7 +108,7 @@ function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*p
             xMax, yMax, zMax,
             omega, omegaX, omegaY, omegaZ,
             CuArray(x), CuArray(y), CuArray(z),
-            nAtoms, mass, scatterLen,
+            nAtoms, mass, scatterLen, g,
             a0x, a0y, a0z, Rxy, winding,
             CuArray(complex(px)), CuArray(complex(py)), CuArray(complex(pz)),
             CuArray(complex(k)),

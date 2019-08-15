@@ -1,4 +1,5 @@
 function evolve(f::FileData, par::Params, opr::Operators, aux::Aux)
+  update_density!(par, opr, aux)
   normalize!(par, opr)
 
   writeAttributes(f, par)
@@ -17,7 +18,7 @@ function evolve(f::FileData, par::Params, opr::Operators, aux::Aux)
 
     split_op!(par, opr, aux)
 
-    # apply_gauge!(par, opr, aux)
+    apply_gauge!(par, opr, aux)
 
     aux.i += 1
   end
