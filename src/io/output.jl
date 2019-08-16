@@ -8,6 +8,11 @@ struct FileData
   v::HDF5Group
   k::HDF5Group
 
+  p::HDF5Group
+  px::HDF5Group
+  py::HDF5Group
+  pz::HDF5Group
+
   a::HDF5Group
   ax::HDF5Group
   ay::HDF5Group
@@ -41,7 +46,7 @@ function writeWfc(f::FileData, par::Params, opr::Operators, aux::Aux)
   else
     group = f.wfc_ev
   end
-  
+  println("Writing wfc $(aux.i) to file")
   group[zpad(aux.i), "chunk", getChunks(opr.wfc), "compress", par.compression] = Array(opr.wfc)
 end
 
@@ -52,9 +57,11 @@ function writeV(f::FileData, par::Params, opr::Operators, aux::Aux)
 end
 
 function writeK(f::FileData, par::Params, opr::Operators, aux::Aux)
-  group = f.k
+  f.k[zpad(aux.i), "chunk", getChunks(opr.K), "compress", par.compression] = Array(opr.K)
 
-  group[zpad(aux.i), "chunk", getChunks(opr.K), "compress", par.compression] = Array(opr.K)
+  f.px[zpad(aux.i), "chunk", getChunks(par.px), "compress", par.compression] = Array(par.px)
+  f.py[zpad(aux.i), "chunk", getChunks(par.py), "compress", par.compression] = Array(par.py)
+  f.pz[zpad(aux.i), "chunk", getChunks(par.pz), "compress", par.compression] = Array(par.pz)
 end
 
 function writeGauge(f::FileData, par::Params, opr::Operators, aux::Aux)
@@ -84,6 +91,11 @@ function initFileData()
   v = g_create(file, "V")
   k = g_create(file, "K")
 
+  p = g_create(file, "P")
+  px = g_create(p, "PX")
+  py = g_create(p, "PY")
+  pz = g_create(p, "PZ")
+  
   a = g_create(file, "A")
   ax = g_create(a, "AX")
   ay = g_create(a, "AY")
@@ -91,7 +103,7 @@ function initFileData()
 
   domain = g_create(file, "DOMAIN")
 
-  return FileData(file, wfc, wfc_const, wfc_ev, v, k, a, ax, ay, az, domain)
+  return FileData(file, wfc, wfc_const, wfc_ev, v, k, p, px, py, pz, a, ax, ay, az, domain)
 end
 
 ## Loading previous output
@@ -106,6 +118,11 @@ function loadFileData()
   v = file["V"]
   k = file["K"]
 
+  p = file["P"]
+  px = p["PX"]
+  py = p["PY"]
+  pz = p["PZ"]
+
   a = file["A"]
   ax = a["AX"]
   ay = a["AY"]
@@ -113,7 +130,7 @@ function loadFileData()
 
   domain = file["DOMAIN"]
 
-  return FileData(file, wfc, wfc_const, wfc_ev, v, k, a, ax, ay, az, domain)
+  return FileData(file, wfc, wfc_const, wfc_ev, v, k, p, px, py, pz, a, ax, ay, az, domain)
 end
 
 
