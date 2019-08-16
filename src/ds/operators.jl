@@ -18,7 +18,6 @@ function Operators(par::Params)
                 +(par.z / par.Rxy / par.a0z) * (par.z / par.Rxy / par.a0z)))
   wfc = @. wfc * cos(ϕ) + wfc * im * sin(ϕ)
 
-
   Ax = CuArray{Complex{Float64}}(undef, size(wfc))
   Ay = CuArray{Complex{Float64}}(undef, size(wfc))
   Az = CuArray{Complex{Float64}}(undef, size(wfc))
@@ -31,13 +30,13 @@ function Operators(par::Params)
   Vy = @. par.omegaY * par.y
   Vz = @. par.omegaZ * par.z
 
-  V = @. 0.5 * par.mass * (Vx * Vx + Vy * Vy + Vz * Vz + Ax * Ax + Ay * Ay + Az * Az)
+  V = @. 0.5 * par.mass * ((Vx * Vx + Vy * Vy + Vz * Vz) + (Ax * Ax + Ay * Ay + Az * Az))
   
   V = @. exp(0.5im * par.dt / ħ * V)
   K = @. exp(1.0im * par.dt / ħ * par.k)
-  Ax = @. exp(1.0im * Ax * par.px * par.dt)
-  Ay = @. exp(1.0im * Ay * par.py * par.dt)
-  Az = @. exp(1.0im * Az * par.pz * par.dt)
+  Ax = @. exp(1.0im * par.dt * Ax * par.px)
+  Ay = @. exp(1.0im * par.dt * Ay * par.py)
+  Az = @. exp(1.0im * par.dt * Az * par.pz)
 
   return Operators(V, K, wfc, Ax, Ay, Az)
 end

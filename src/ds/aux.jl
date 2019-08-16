@@ -1,7 +1,6 @@
 mutable struct Aux
   
   i::Integer
-  density::Float64
 
   forward_plan_all
   forward_plan_x
@@ -39,7 +38,7 @@ function Aux(par::Params, opr::Operators)
     forward_plan_z = inverse_plan_z = nothing
   end
   
-  return Aux(0, -1,
+  return Aux(0,
             forward_plan_all,
             forward_plan_x, forward_plan_y, forward_plan_z,
             inverse_plan_all,
