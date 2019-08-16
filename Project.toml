@@ -1,4 +1,5 @@
 name = "GPUE"
+uuid = "aef476a8-1c94-5f10-af32-eb55d75dffbb"
 
 [deps]
 CUDAnative = "be33ccc6-a3ff-5ff2-a52e-74243cff1e17"
