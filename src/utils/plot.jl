@@ -9,11 +9,11 @@ gstate = read(attrs(f.file)["gstate"])
 
 group = gstate ? f.wfc_const : f.wfc_ev
 
-anim = @animate for name in names(group)
+anim = @animate for name in names(group)[2:end]
   println("Writing frame: $name")
   dset = group[name]
   data = read(dset)
-  heatmap(abs.(data), clims=(0, 4e4))
+  heatmap(abs.(data))
   annotate!([(0, -20, "$name")])
 end
 
