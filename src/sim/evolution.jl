@@ -1,13 +1,12 @@
 function evolve(f::FileData, par::Params, opr::Operators, aux::Aux)
   normalize!(par, opr, aux)
 
-  writeAttributes(f, par)
-
   iterations = par.iterations
   while aux.i < iterations
-    if aux.i % par.printSteps == 0
+    if aux.i % par.printSteps == 0 && par.writeOut
       writeWfc(f, par, opr, aux)
       if aux.i == 0
+        writeAttributes(f, par)
         writeV(f, par, opr, aux)
         writeK(f, par, opr, aux)
         writeGauge(f, par, opr, aux)
