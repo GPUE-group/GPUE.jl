@@ -1,3 +1,14 @@
+"""
+    Operators
+
+GPUE.jl structure for all operator values:
+- `V`: Real-space trapping potential operator
+- `K`: Momentum-space operator
+- `wfc`: Wave function
+- `Ax`: Gauge field in the X dimension
+- `Ay`: Gauge field in the Y dimension
+- `Az`: Gauge field in the Z dimension
+"""
 mutable struct Operators
 
   V::CuArray{Complex{Float64}}
@@ -9,6 +20,12 @@ mutable struct Operators
   Az::CuArray{Complex{Float64}}
 end
 
+"""
+  Operators(par::Params)
+
+Constructs the `Operators` structure.
+Initializes the operators given the simulation parameters.
+"""
 function Operators(par::Params)
  
   wfc = CuArray{Complex{Float64}}(undef, (par.xDim, par.yDim, par.zDim)[1:par.dimnum])
