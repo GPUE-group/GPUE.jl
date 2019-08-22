@@ -38,7 +38,6 @@ struct Params
   px::CuArray{Complex{Float64}}
   py::CuArray{Complex{Float64}}
   pz::CuArray{Complex{Float64}}
-  k::CuArray{Complex{Float64}}
 
   compression::Integer
 
@@ -86,10 +85,6 @@ function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*p
   dy = dimnum < 2 ? 1 : 2 * yMax / yDim
   dz = dimnum < 3 ? 1 : 2 * zMax / zDim
 
-  x = dimnum < 1 ? [0] : reshape(collect(-xMax + dx/2 : dx : xMax), (xDim,))
-  y = dimnum < 2 ? [0] : reshape(collect(-yMax + dy/2 : dy : yMax), (1, yDim))
-  z = dimnum < 3 ? [0] : reshape(collect(-zMax + dz/2 : dz : zMax), (1, 1, zDim))
-
   dpx = pi / xMax
   dpy = pi / yMax
   dpz = pi / zMax
@@ -98,13 +93,15 @@ function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*p
   pyMax = dpy * (yDim / 2)
   pzMax = dpz * (zDim / 2)
 
+  gstate = real(dt) != dt
+
+  x = dimnum < 1 ? [0] : reshape(collect(-xMax + dx/2 : dx : xMax), (xDim,))
+  y = dimnum < 2 ? [0] : reshape(collect(-yMax + dy/2 : dy : yMax), (1, yDim))
+  z = dimnum < 3 ? [0] : reshape(collect(-zMax + dz/2 : dz : zMax), (1, 1, zDim))
+
   px = dimnum < 1 ? [0] : reshape(vcat(0 : dpx : pxMax - dpx, -pxMax : dpx : -dpx / 2), (xDim,))
   py = dimnum < 2 ? [0] : reshape(vcat(0 : dpy : pyMax - dpy, -pyMax : dpy : -dpy / 2), (1, yDim))
   pz = dimnum < 3 ? [0] : reshape(vcat(0 : dpz : pzMax - dpz, -pzMax : dpz : -dpz / 2), (1, 1, zDim))
-  
-  k = @. (ħ * ħ / (2.0 * mass)) * (px * px + py * py + pz * pz)
-
-  gstate = real(dt) != dt
 
   return Params(dimnum,
             xDim, yDim, zDim,
@@ -115,7 +112,6 @@ function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*p
             nAtoms, mass, scatterLen, g,
             a0x, a0y, a0z, Rxy, winding,
             CuArray(complex(px)), CuArray(complex(py)), CuArray(complex(pz)),
-            CuArray(complex(k)),
             compression,
             dt,
             gstate,
