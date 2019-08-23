@@ -1,5 +1,5 @@
 """
-    evolve(f::FileData, par::Params, opr::Operators, aux::Aux)
+    evolve!(f::FileData, par::Params, opr::Operators, aux::Aux)
 
 Start running the main evolution of the system, according to the
 settings defined in the Params.
