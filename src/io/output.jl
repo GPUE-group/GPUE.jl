@@ -198,7 +198,7 @@ function loadFileData(file_name="data.h5")
   HDF5.set_complex_field_names("re", "im")
   file = h5open("./output/$file_name", "r+")
 
-  wfc = openGroup(file "WFC")
+  wfc = openGroup(file, "WFC")
   wfc_const = openGroup(wfc, "CONST")
   wfc_ev = openGroup(wfc, "EV")
 

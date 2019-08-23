@@ -55,11 +55,11 @@ module GPUE
   include("sim/gauge.jl")
 
   include("sim/evolution.jl")
-  export evolve
+  export evolve!
 
   # Load management functions
 
   include("sim/terminate.jl")
-  export terminate
+  export terminate!
 end
 
