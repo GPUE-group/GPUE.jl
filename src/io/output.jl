@@ -220,6 +220,60 @@ function loadFileData(file_name="data.h5")
   return FileData(file, wfc, wfc_const, wfc_ev, v, k, p, px, py, pz, a, ax, ay, az, domain)
 end
 
+"""
+    loadParams(f::FileData, par::Params)
+
+Load the params from the data file
+"""
+function loadParams(f::FileData, par::Params)
+  for name in names(attrs(f.file))
+    val = f.file[name].value
+    setproperty!(par, Symbol(name), val)
+  end
+end
+
+"""
+    loadDset(group)
+
+Helper function to load the data from the latest dataset from a group 
+"""
+function loadDset(group)
+  if length(names(group)) < 1
+    return missing
+  end
+  iter_str = last(sort(names(group)))
+  dset = group[iter_str]
+
+  return CuArray(read(dset))
+end
+
+"""
+    loadWfc(f::FileData, par::Params)
+
+Load the wave function from the data file
+"""
+function loadWfc(f::FileData, par::Params)
+  group = par.gstate ? f.wfc_const : f.wfc_ev
+  return loadDset(group)
+end
+
+"""
+    loadV(f::FileData, par::Params)
+
+Load the real-space trapping potential operator from the data file
+"""
+function loadV(f::FileData, par::Params)
+  return loadDset(f.v)
+end
+
+"""
+    loadK(f::FileData, par::Params)
+
+Load the momentum-space operator from the data file
+"""
+function loadK(f::FileData, par::Params)
+  return map(loadDset, [f.k, f.px, f.py, f.pz])
+end
 
 ## Conclude operations
 
