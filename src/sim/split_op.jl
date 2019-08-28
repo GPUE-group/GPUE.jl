@@ -23,7 +23,7 @@ or the [Algorithm Archive page on the Split-Operator Method]
 function split_op!(par::Params, opr::Operators, aux::Aux)
 
   # Half-step in real space
-  @. opr.wfc *= opr.V * exp(1.0im * par.g * abs2(opr.wfc) * par.dt / ħ)
+  @. opr.wfc *= opr.V * exp(-1.0im * par.g * abs2(opr.wfc) * par.dt / ħ)
 
   # FFT to momentum space
   aux.forward_plan_all * opr.wfc
@@ -35,7 +35,7 @@ function split_op!(par::Params, opr::Operators, aux::Aux)
   aux.inverse_plan_all * opr.wfc
 
   # Final half-step in real space
-  @. opr.wfc *= opr.V * exp(1.0im * par.g * abs2(opr.wfc) * par.dt / ħ)
+  @. opr.wfc *= opr.V * exp(-1.0im * par.g * abs2(opr.wfc) * par.dt / ħ)
 
   # Renormalize if we are in imaginary time
   if par.gstate

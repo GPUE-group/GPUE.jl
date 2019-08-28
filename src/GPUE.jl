@@ -33,12 +33,12 @@ module GPUE
 
   # Load data structures
 
-  include("ds/params.jl")
-  export Params
-
   include("ds/filedata.jl")
   export FileData
   export initFileData, loadFileData
+
+  include("ds/params.jl")
+  export Params
 
   include("ds/operators.jl")
   export Operators

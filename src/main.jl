@@ -1,10 +1,10 @@
 using GPUE
 
 function main()
-  f = initFileData()
+  f = loadFileData()
 
-  par = Params(xDim=512, yDim=512, printSteps=2500, iterations=50000, dt=1e-4im, omega=0.6, nAtoms=1e5, omegaZ=100)
-  opr = Operators(par)
+  par = Params(f; xDim=512, yDim=512, printSteps=2500, iterations=50000, dt=1e-4/im, omega=0.6, nAtoms=1e5, omegaZ=100)
+  opr = Operators(f, par)
   aux = Aux(par, opr)
 
   try

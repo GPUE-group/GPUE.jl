@@ -5,7 +5,7 @@ GPUE.jl structure for all readonly values
 
 Entries include simulation constants, settings, and coordinate grids
 """
-struct Params
+mutable struct Params
   dimnum::Integer
 
   xDim::Integer
@@ -58,12 +58,14 @@ struct Params
 end
 
 """
-    Params(; kwargs...)
+    Params(f::FileData; kwargs...)
 
 Constructs the `Params` structure.
 Takes only keyword arguments and returns a new `Params` object with the given and derived data.
+Will load from file if FileData was created from an existing file.
 
 # Arguments
+- `f::FileData`: The FileData structure, used for loading from file.
 - `xDim::Integer=256`: The width of the simulation.
 - `yDim::Integer=256`: The height of the simulation. For 1D, set equal to 1.
 - `zDim::Integer=1`: The depth of the simulation. For 2D or below, set equal to 1.
@@ -74,7 +76,7 @@ Takes only keyword arguments and returns a new `Params` object with the given an
 - `omegaZ::Float64=2π`: The rotation coefficient for gauge field simulation in the Z dimension
 - `winding::Float64=0.0`: The scaling factor for induced phase winding in the initial wave function.
 - `compression::Integer=6` The compression level for HDF5 output. Must be in the range [0, 9].
-- `dt::Float64=1e-4`: The timestep size. For groundstate simulation, multiply `dt` by the imaginary unit.
+- `dt::Float64=1e-4`: The timestep size. For groundstate simulation, divide `dt` by the imaginary unit.
 - `nAtoms::Integer=1`: The number of atoms to simulate.
 - `mass::Float64=1.4431607e-25`: The mass of the particle (in kg), defaults to that of Rubidium-87.
 - `scatterLen::Float64=4.76e-9`: The scattering length of the particle.
@@ -83,7 +85,7 @@ Takes only keyword arguments and returns a new `Params` object with the given an
 - `writeOut::Bool=true`: The condition for writing simulation data to file.
 
 """
-function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*pi, omegaY=2*pi, omegaZ=2*pi, winding=0.0, compression=6, dt=1e-4, nAtoms=1, mass=1.4431607e-25, scatterLen=4.76e-9, iterations=1, printSteps=100, writeOut=true)
+function Params(f::FileData; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*pi, omegaY=2*pi, omegaZ=2*pi, winding=0.0, compression=6, dt=1e-4, nAtoms=1, mass=1.4431607e-25, scatterLen=4.76e-9, iterations=1, printSteps=100, writeOut=true)
   if yDim == zDim == 1
     dimnum = 1
   elseif zDim == 1
@@ -133,7 +135,7 @@ function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*p
   py = dimnum < 2 ? [0] : reshape(vcat(0 : dpy : pyMax - dpy, -pyMax : dpy : -dpy / 2), (1, yDim))
   pz = dimnum < 3 ? [0] : reshape(vcat(0 : dpz : pzMax - dpz, -pzMax : dpz : -dpz / 2), (1, 1, zDim))
 
-  return Params(dimnum,
+  par = Params(dimnum,
             xDim, yDim, zDim,
             dx, dy, dz,
             xMax, yMax, zMax,
@@ -146,5 +148,9 @@ function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*p
             dt,
             gstate,
             iterations, printSteps, writeOut)
+
+  loadParams!(f, par)
+
+  return par
 end
 

@@ -1,11 +1,11 @@
 """
-    loadParams(f::FileData, par::Params)
+    loadParams!(f::FileData, par::Params)
 
-Load the params from the data file
+Load the parameters from the data file
 """
-function loadParams(f::FileData, par::Params)
+function loadParams!(f::FileData, par::Params)
   for name in names(attrs(f.file))
-    val = f.file[name].value
+    val = read(attrs(f.file)[name])
     setproperty!(par, Symbol(name), val)
   end
 end
