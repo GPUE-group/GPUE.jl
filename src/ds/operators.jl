@@ -2,19 +2,31 @@
     Operators
 
 GPUE.jl structure for all operator values:
+- `v`: Real-valued real-space trapping potential, before exponentiation
 - `V`: Real-space trapping potential operator
+- `k`: Real-valued momentum-space values, before exponentiation
 - `K`: Momentum-space operator
 - `wfc`: Wave function
-- `Ax`: Gauge field in the X dimension
-- `Ay`: Gauge field in the Y dimension
-- `Az`: Gauge field in the Z dimension
+- `ax`: Gauge field values in the X dimension, before exponentiation
+- `ay`: Gauge field values in the Y dimension, before exponentiation
+- `az`: Gauge field values in the Z dimension, before exponentiation
+- `Ax`: Gauge field operator in the X dimension
+- `Ay`: Gauge field operator in the Y dimension
+- `Az`: Gauge field operator in the Z dimension
 """
 mutable struct Operators
 
+  v::Array{Complex{Float64}}
   V::CuArray{Complex{Float64}}
+
+  k::Array{Complex{Float64}}
   K::CuArray{Complex{Float64}}
+
   wfc::CuArray{Complex{Float64}}
 
+  ax::Array{Complex{Float64}}
+  ay::Array{Complex{Float64}}
+  az::Array{Complex{Float64}}
   Ax::CuArray{Complex{Float64}}
   Ay::CuArray{Complex{Float64}}
   Az::CuArray{Complex{Float64}}
@@ -50,15 +62,21 @@ function Operators(par::Params)
   ωz2 = par.omegaZ ^ 2
 
   @. K = 0.5ħ / par.mass * (par.px * par.px + par.py * par.py + par.pz * par.pz)
-  @. K = CUDAnative.exp(1.0im * par.dt * K)
-  
-  @. V = 0.5 * par.mass * (((ωx2 * par.x * par.x) + (ωy2 * par.y * par.y) + (ωz2 * par.z * par.z)) + (Ax * Ax + Ay * Ay + Az * Az))
+  @. V = 0.5 * par.mass * (((ωx2 * par.x * par.x) + (ωy2 * par.y * par.y) + (ωz2 * par.z * par.z)) + (ax * ax + ay * ay + az * az))
+
+  ax = Array(Ax)
+  ay = Array(Ay)
+  az = Array(Az)
+
+  k = Array(k)
+  v = Array(v)
+
   @. V = CUDAnative.exp(0.5im * par.dt / ħ * V)
+  @. K = CUDAnative.exp(1.0im * par.dt * K)
+  @. Ax = CUDAnative.exp(1.0im * par.dt * ax * par.px)
+  @. Ay = CUDAnative.exp(1.0im * par.dt * ay * par.py)
+  @. Az = CUDAnative.exp(1.0im * par.dt * az * par.pz)
 
-  @. Ax = CUDAnative.exp(1.0im * par.dt * Ax * par.px)
-  @. Ay = CUDAnative.exp(1.0im * par.dt * Ay * par.py)
-  @. Az = CUDAnative.exp(1.0im * par.dt * Az * par.pz)
-
-  return Operators(V, K, wfc, Ax, Ay, Az)
+  return Operators(v, V, k, K, wfc, ax, ay, az, Ax, Ay, Az)
 end
 
