@@ -7,8 +7,7 @@ settings defined in the Params.
 function evolve!(f::FileData, par::Params, opr::Operators, aux::Aux)
   normalize!(par, opr, aux)
 
-  iterations = par.iterations
-  while aux.i <= iterations
+  for _=1:par.iterations
     if aux.i % par.printSteps == 0 && par.writeOut
       writeWfc(f, par, opr, aux)
       writeAux(f, aux)
