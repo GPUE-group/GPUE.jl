@@ -58,14 +58,12 @@ mutable struct Params
 end
 
 """
-    Params(f::FileData; kwargs...)
+    Params(; kwargs...)
 
 Constructs the `Params` structure.
 Takes only keyword arguments and returns a new `Params` object with the given and derived data.
-Will load from file if FileData was created from an existing file.
 
 # Arguments
-- `f::FileData`: The FileData structure, used for loading from file.
 - `xDim::Integer=256`: The width of the simulation.
 - `yDim::Integer=256`: The height of the simulation. For 1D, set equal to 1.
 - `zDim::Integer=1`: The depth of the simulation. For 2D or below, set equal to 1.
@@ -85,7 +83,7 @@ Will load from file if FileData was created from an existing file.
 - `writeOut::Bool=true`: The condition for writing simulation data to file.
 
 """
-function Params(f::FileData; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*pi, omegaY=2*pi, omegaZ=2*pi, winding=0.0, compression=6, dt=1e-4, nAtoms=1, mass=1.4431607e-25, scatterLen=4.76e-9, iterations=1, printSteps=100, writeOut=true)
+function Params(; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0, omegaX=2*pi, omegaY=2*pi, omegaZ=2*pi, winding=0.0, compression=6, dt=1e-4, nAtoms=1, mass=1.4431607e-25, scatterLen=4.76e-9, iterations=1, printSteps=100, writeOut=true)
   if yDim == zDim == 1
     dimnum = 1
   elseif zDim == 1
@@ -135,7 +133,7 @@ function Params(f::FileData; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0,
   py = dimnum < 2 ? [0] : reshape(vcat(0 : dpy : pyMax - dpy, -pyMax : dpy : -dpy / 2), (1, yDim))
   pz = dimnum < 3 ? [0] : reshape(vcat(0 : dpz : pzMax - dpz, -pzMax : dpz : -dpz / 2), (1, 1, zDim))
 
-  par = Params(dimnum,
+  return Params(dimnum,
             xDim, yDim, zDim,
             dx, dy, dz,
             xMax, yMax, zMax,
@@ -148,9 +146,36 @@ function Params(f::FileData; xDim=256, yDim=256, zDim=1, boxSize=0.0, omega=0.0,
             dt,
             gstate,
             iterations, printSteps, writeOut)
+end
 
-  loadParams!(f, par)
+"""Helper function to add an item to dictionary if it is not missing"""
+function addIf!(dict, name, value, fallbackDict)
+  if !ismissing(value)
+    dict[name] = value
+  else
+    try
+      dict[name] = fallbackDict[name]
+    catch
+    end
+  end
+end
 
-  return par
+"""
+    Params(f::FileData; kwargs...)
+
+Wrapper from the Params constructor, loading from file when possible
+"""
+function Params(f::FileData; xDim=missing, yDim=missing, zDim=missing, boxSize=missing, omega=missing, omegaX=missing, omegaY=missing, omegaZ=missing, winding=missing, compression=missing, dt=missing, nAtoms=missing, mass=missing, scatterLen=missing, iterations=missing, printSteps=missing, writeOut=missing)
+  # Get all stored params from the file
+  paramDict = loadParams(f)
+
+  out = Dict()
+
+  # Add every explicitly given kwarg into the kwargs dict, overwriting the loaded data from file
+  for (expr, value) in [(:xDim, xDim), (:yDim, yDim), (:zDim, zDim), (:boxSize, boxSize), (:omega, omega), (:omegaX, omegaX), (:omegaY, omegaY), (:omegaZ, omegaZ), (:winding, winding), (:compression, compression), (:dt, dt), (:nAtoms, nAtoms), (:mass, mass), (:scatterLen, scatterLen), (:iterations, iterations), (:printSteps, printSteps), (:writeOut, writeOut)]
+    addIf!(out, expr, value, paramDict)
+  end
+
+  return Params(; out...)
 end
 

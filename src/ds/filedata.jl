@@ -26,6 +26,8 @@ struct FileData
   az::HDF5Group
 
   domain::HDF5Group
+  
+  aux::HDF5Group
 end
 
 # Constructors
@@ -61,7 +63,9 @@ function initFileData(file_name="data.h5")
 
   domain = g_create(file, "DOMAIN")
 
-  return FileData(file, wfc, wfc_const, wfc_ev, v, k, p, px, py, pz, a, ax, ay, az, domain)
+  aux = g_create(file, "AUX")
+
+  return FileData(file, wfc, wfc_const, wfc_ev, v, k, p, px, py, pz, a, ax, ay, az, domain, aux)
 end
 
 """Helper to open a group if it exists"""
@@ -103,7 +107,9 @@ function loadFileData(file_name="data.h5")
 
   domain = openGroup(file, "DOMAIN")
 
-  return FileData(file, wfc, wfc_const, wfc_ev, v, k, p, px, py, pz, a, ax, ay, az, domain)
+  aux = openGroup(file, "AUX")
+
+  return FileData(file, wfc, wfc_const, wfc_ev, v, k, p, px, py, pz, a, ax, ay, az, domain, aux)
 end
 
 # Destructor

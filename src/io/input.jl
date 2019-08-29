@@ -1,12 +1,27 @@
 """
-    loadParams!(f::FileData, par::Params)
+    loadParams(f::FileData)
 
 Load the parameters from the data file
+Returns a dictionary containing all found values
 """
-function loadParams!(f::FileData, par::Params)
+function loadParams(f::FileData)
+  out = Dict()
   for name in names(attrs(f.file))
-    val = read(attrs(f.file)[name])
-    setproperty!(par, Symbol(name), val)
+    out[name] = read(attrs(f.file)[name])
+  end
+  return out
+end
+
+"""
+    loadAux!(f::FileData, aux::Aux)
+
+Load the dynamic parameters (namely the iteration counter `i`)
+from the data file
+"""
+function loadAux!(f::FileData, aux::Aux)
+  for name in names(attrs(f.aux))
+    val = read(attrs(f.aux)[name])
+    setproperty!(aux, Symbol(name), val)
   end
 end
 

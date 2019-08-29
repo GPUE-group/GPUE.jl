@@ -22,12 +22,13 @@ mutable struct Aux
 end
 
 """
-    Aux(par::Params, opr::Operators)
+    Aux(f::FileData, par::Params, opr::Operators)
 
 Constructs the `Aux` structure.
 Initializes auxiliary variables, and creates plans for the FFTs.
+Will load scalars (`i`) from file if FileData was created from an existing file.
 """
-function Aux(par::Params, opr::Operators)
+function Aux(f::FileData, par::Params, opr::Operators)
   forward_plan_all = plan_fft!(opr.wfc)
   inverse_plan_all = plan_ifft!(opr.wfc)
   
@@ -52,10 +53,14 @@ function Aux(par::Params, opr::Operators)
     forward_plan_z = inverse_plan_z = nothing
   end
 
-  return Aux(0,
+  aux = Aux(0,
             forward_plan_all,
             forward_plan_x, forward_plan_y, forward_plan_z,
             inverse_plan_all,
             inverse_plan_x, inverse_plan_y, inverse_plan_z)
+
+  loadAux!(f, aux)
+
+  return aux
 end
 

@@ -8,9 +8,10 @@ function evolve!(f::FileData, par::Params, opr::Operators, aux::Aux)
   normalize!(par, opr, aux)
 
   iterations = par.iterations
-  while aux.i < iterations
+  while aux.i <= iterations
     if aux.i % par.printSteps == 0 && par.writeOut
       writeWfc(f, par, opr, aux)
+      writeAux(f, aux)
       if aux.i == 0
         writeAttributes(f, par)
         writeV(f, par, opr, aux)

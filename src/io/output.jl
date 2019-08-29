@@ -13,6 +13,27 @@ function writeAttributes(f::FileData, par::Params)
   end
 end
 
+"""
+    writeAux(f::FileData, aux::Aux)
+
+Write all scalar auxiliary variables (namely the iteration counter `i`)
+to the file as attributes on the file's `AUX` group.
+"""
+function writeAux(f::FileData, aux::Aux)
+  for sym in propertynames(aux)
+    val = getproperty(aux, sym)
+    if typeof(val) <: HDF5.HDF5Scalar
+      if exists(attrs(f.aux), string(sym))
+        a_delete(f.aux, string(sym))
+      end
+      if string(sym) == "i"
+        val += 1
+      end
+      attrs(f.aux)[string(sym)] = val
+    end
+  end
+end
+
 """Helper to determine the size of the chunks given a nd-array."""
 function getChunks(x)
   map(elem -> Int(floor(sqrt(elem))), size(x))
@@ -40,7 +61,9 @@ function writeWfc(f::FileData, par::Params, opr::Operators, aux::Aux)
   else
     group = f.wfc_ev
   end
+
   println("Writing wfc $(aux.i) to file")
+
   group[zpad(aux.i), "chunk", getChunks(opr.wfc), "compress", par.compression] = Array(opr.wfc)
 end
 
